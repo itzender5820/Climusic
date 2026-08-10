@@ -1,0 +1,186 @@
+## ═══════════════════════════════════════════════════════════════════
+##                       CLI.MUSIC.COM — config.txt
+##     100% control interface — edit this file for full customisation
+##     Runtime settings (~75% control) are available via S key in-app
+## ═══════════════════════════════════════════════════════════════════
+
+## ───────────────────────────────────────────────────────────────────
+## DESKTOP LAYOUT  (used when terminal width >= 120 columns)
+##
+## Syntax:  [BLOCK_NAME], \   <- comma + backslash = new row
+##          [BLOCK_NAME {side, ±w_chars, h_rows}]
+##
+## Valid blocks: META  COVER  LYRICS  VOCAL-VIZ  VIZ
+##               PROGRESS-BAR  LIST  QUEUE  HELP  []
+##
+## Direction blocks (extend a neighbour into this cell's space):
+##   LEFT   RIGHT   UP   DOWN
+##
+## Modifiers  {side, ±width_delta, absolute_height}
+##   side     = left | right | top | bottom   (informational only)
+##   ±w       = extra/fewer terminal columns  (e.g. +6  or  -4)
+##   h        = absolute row height in lines  (sign stripped by parser)
+## ───────────────────────────────────────────────────────────────────
+
+DESK_MODE={
+            [LIST][METADATA],\
+            [UP][LYRICS],\
+            [RIGHT][VIZ],\
+            [PROGRESS-BAR],\
+            [QUEUE],\
+          };
+
+## Row heights for desktop mode (one entry per row, top→bottom)
+DESK_MODE_ROW={
+               ROW_1=7
+               ROW_2=10
+               ROW_3=13
+               ROW_4=3
+               ROW_5=10
+              };
+
+## ───────────────────────────────────────────────────────────────────
+## MOBILE LAYOUT  (used when terminal width < 120 columns)
+## ───────────────────────────────────────────────────────────────────
+
+MOBILE_MODE={
+              [METADATA][QUEUE],\
+              [PROGRESS-BAR],\
+              [LYRICS],\
+              [VIZ],\
+              [LIST],\
+              [UP],\
+            };
+
+MOBILE_MODE_ROW={
+                  ROW_1=12
+                  ROW_2=3
+                  ROW_3=10
+                  ROW_4=18
+                  ROW_5=32
+                  ROW_6=22
+                };
+
+## ───────────────────────────────────────────────────────────────────
+## FONT STYLING
+## Each letter maps to { uppercase_display, lowercase_display }.
+## Paste any unicode glyph — the player will use it when rendering
+## titles and labels.
+##
+## Unicode sources:
+##   https://www.compart.com/en/unicode/category/So     (massive lib)
+##   https://tools.picsart.com/text/font-generator/     (quick preview)
+## ───────────────────────────────────────────────────────────────────
+
+font_en={
+          A={A,a},
+          B={B,b},
+          C={C,c},
+          D={D,d},
+          E={E,e},
+          F={F,f},
+          G={G,g},
+          H={H,h},
+          I={I,i},
+          J={J,j},
+          K={K,k},
+          L={L,l},
+          M={M,m},
+          N={N,n},
+          O={O,o},
+          P={P,p},
+          Q={Q,q},
+          R={R,r},
+          S={S,s},
+          T={T,t},
+          U={U,u},
+          V={V,v},
+          W={W,w},
+          X={X,x},
+          Y={Y,y},
+          Z={Z,z},
+        };
+
+## ───────────────────────────────────────────────────────────────────
+## BORDER / BOX DRAWING CHARACTERS
+## https://www.compart.com/en/unicode/block/U+2500  (box drawing)
+## ───────────────────────────────────────────────────────────────────
+
+upper_left_corner="╭";
+upper_right_corner="╮";
+bottom_left_corner="╰";
+lower_right_corner="╯";
+vertical="│";
+horizontal="─";
+
+## ───────────────────────────────────────────────────────────────────
+## COLOUR SCHEME  (ANSI 256-colour index, brightness 0-100)
+## https://hexdocs.pm/color_palette/ansi_color_codes.html
+## ───────────────────────────────────────────────────────────────────
+
+theme_idx=0
+viz_style=0
+viz_bands=32
+peak_hold=0
+viz_density=1
+## Live visualizer while streaming (yt:) needs a second, independent
+## yt-dlp+ffmpeg audio fetch just to get PCM for the FFT/vocal viz — real
+## extra bandwidth/battery cost since the actual playback audio is a
+## separate fetch through mpv/ffplay. Set to 0 to disable and just show
+## the "streaming — no visualizer data" placeholder instead.
+STREAM_VISUALIZER_ENABLED=1
+
+border=39,100
+title=255,100
+meta_key=117,100
+meta_val=87,100
+progress=45,100
+progress_bg=17,100
+status=252,70
+playlist=195,100
+pl_active_fg=15,100
+pl_active_bg=19,100
+viz=39,100
+viz_left=27,100
+viz_center=45,100
+viz_right=51,100
+viz_peak=159,100
+lyr_dim=195,50
+lyr_hi=159,100
+lyr_word=123,100
+noise=38,70
+
+## ───────────────────────────────────────────────────────────────────
+## HOTKEY MAPPING
+## Single chars: "S"  "/"  "A"  etc.
+## Special keys: ARROW_KEY_UP  ARROW_KEY_DOWN  ARROW_KEY_LEFT  ARROW_KEY_RIGHT
+##               ENTER  TAB  SPACE  ESC  BACKSPACE
+## Unicode arrow glyphs also accepted: →  ←  ↑  ↓
+## ───────────────────────────────────────────────────────────────────
+
+HKEY_SETTING="s"
+HKEY_NAVIGATE_UP="ARROW_KEY_UP"
+HKEY_NAVIGATE_DOWN="ARROW_KEY_DOWN"
+HKEY_PRESS_TO_PLAY="ENTER"
+HKEY_PRESS_TO_SEARCH="/"
+HKEY_PRESS_TO_PLAY_NEXT_SONG="n"
+HKEY_PRESS_TO_PLAY_PREVIOUS_SONG="b"
+HKEY_PRESS_TO_SEEK_FORWARD="ARROW_KEY_RIGHT"
+HKEY_PRESS_TO_SEEK_BACKWARD="ARROW_KEY_LEFT"
+HKEY_PRESS_TO_INCRESE_VOLUME="1"
+HKEY_PRESS_TO_DECRESE_VOLUME="2"
+HKEY_PRESS_TO_ADD_HOVERING_SONG_TO_QUEUE="a"
+HKEY_PRESS_TO_REMOVE_HOVERING_SONG_FROK_QUEUE="d"
+HKEY_PRESS_TO_SWITCH_BETWEEN_CARDS="TAB"
+KHEY_PRESS_TO_TOGGLE_REPEAT="r"
+HKEY_PRESS_TO_TOGGLE_PLAY_PAUSE="p"
+HKEY_PRESS_TO_TOGGLE_SHUFFLE="m"
+HKEY_PRESS_TO_FILTER_FOR_FOLDER="f"
+HKEY_PRESS_TO_CLEAR_FILTER="c"
+HKEY_PRESS_TO_QUIT="q"
+HKEY_PRESS_TO_RESET_PREFRENCE="e"
+HKEY_PRESS_TO_DOWNLOAD_STREAM="y"
+
+## ───────────────────────────────────────────────────────────────────
+##                         END OF CONFIG
+## ───────────────────────────────────────────────────────────────────
