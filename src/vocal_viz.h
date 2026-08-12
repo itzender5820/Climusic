@@ -70,6 +70,7 @@ public:
             int lag    = (int)((float)ms_val * sr / 1000.0f);
             if (s < 10) lag = -lag;   // left side: L leads
 
+<<<<<<< HEAD
             // BUGFIX (audit B4): for positive lag, ri = li + lag could
             // reach past the write head (wsnap-1) — on a ring buffer that
             // wraps around to OLD data from a different point in time
@@ -87,6 +88,15 @@ public:
                 int li = (wsnap - WINDOW - end_pullback + t + BUF * 4) & (BUF - 1);
                 // R sample shifted by lag
                 int ri = (li + lag + BUF * 4) & (BUF - 1);
+||||||| empty tree
+=======
+            float acc = 0.0f, el = 0.0f, er = 0.0f;
+            for (int t = 0; t < WINDOW; ++t) {
+                // L sample at time t (reading backwards from write head)
+                int li = (wsnap - WINDOW + t + BUF) & (BUF - 1);
+                // R sample shifted by lag
+                int ri = (li + lag + BUF) & (BUF - 1);
+>>>>>>> origin/master
                 float lv = Lsnap[li];
                 float rv = Rsnap[ri];
                 acc += lv * rv;

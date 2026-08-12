@@ -104,6 +104,7 @@ bool AvDecoder::open(const std::string& path) {
 
     if (meta_.title.empty()) {
         size_t s = path.rfind('/');
+<<<<<<< HEAD
         size_t start = (s == std::string::npos) ? 0 : s + 1;
         size_t d = path.rfind('.');
         // BUGFIX (audit B3): when the last '.' occurs before the last '/'
@@ -189,6 +190,71 @@ int AvDecoder::decode_next(float* out, int max_frames) {
                 if (drain_ret < 0) break;   // nothing left to drain / real error — give up on this packet
                 send_ret = avcodec_send_packet(impl_->codec_ctx, impl_->pkt);
             }
+||||||| empty tree
+=======
+        size_t d = path.rfind('.');
+        meta_.title = path.substr(
+            s == std::string::npos ? 0 : s + 1,
+            (d != std::string::npos ? d : path.size()) - (s == std::string::npos ? 0 : s + 1));
+    }
+
+    eof_          = false;
+    open_         = true;
+    leftover_.clear();
+    leftover_pos_ = 0;
+    last_pos_sec_ = 0.0;
+    return true;
+}
+
+// ─── close ───────────────────────────────────────────────────────────────────
+void AvDecoder::close() {
+    if (impl_->frame)    { av_frame_free(&impl_->frame);           impl_->frame    = nullptr; }
+    if (impl_->pkt)      { av_packet_free(&impl_->pkt);            impl_->pkt      = nullptr; }
+    if (impl_->swr_ctx)  { swr_free(&impl_->swr_ctx);              impl_->swr_ctx  = nullptr; }
+    if (impl_->codec_ctx){ avcodec_free_context(&impl_->codec_ctx);impl_->codec_ctx= nullptr; }
+    if (impl_->fmt_ctx)  { avformat_close_input(&impl_->fmt_ctx);  impl_->fmt_ctx  = nullptr; }
+    impl_->stream_idx = -1;
+    eof_  = false;
+    open_ = false;
+    leftover_.clear();
+    leftover_pos_ = 0;
+    last_pos_sec_ = 0.0;
+}
+
+// ─── decode_next ─────────────────────────────────────────────────────────────
+int AvDecoder::decode_next(float* out, int max_frames) {
+    if (!open_ || eof_) return 0;
+    constexpr int CH = 2;
+    int written = 0;
+
+    while (written < max_frames) {
+        // 1. Drain leftover
+        int avail = (int)leftover_.size() / CH - leftover_pos_;
+        if (avail > 0) {
+            int take = std::min(avail, max_frames - written);
+            std::memcpy(out + written * CH,
+                        leftover_.data() + leftover_pos_ * CH,
+                        take * CH * sizeof(float));
+            written      += take;
+            leftover_pos_ += take;
+            if (leftover_pos_ >= (int)leftover_.size() / CH) {
+                leftover_.clear(); leftover_pos_ = 0;
+            }
+            continue;
+        }
+
+        // 2. Read next packet
+        int ret = av_read_frame(impl_->fmt_ctx, impl_->pkt);
+        if (ret == AVERROR_EOF) {
+            avcodec_send_packet(impl_->codec_ctx, nullptr);
+        } else if (ret < 0) {
+            eof_ = true; break;
+        } else {
+            if (impl_->pkt->stream_index != impl_->stream_idx) {
+                av_packet_unref(impl_->pkt); continue;
+            }
+            avcodec_send_packet(impl_->codec_ctx, impl_->pkt);
+>>>>>>> origin/master
             av_packet_unref(impl_->pkt);
         }
 
