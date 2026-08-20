@@ -172,8 +172,8 @@ pkg install -y mpv yt-dlp
 # or, if mpv isn't available: pkg install -y ffmpeg yt-dlp   (ffmpeg ships ffplay)
 
 # 4. Clone and build
-git clone https://github.com/yourname/climusic.git
-cd climusic
+git clone https://github.com/itzender5820/Climusic.git
+cd Climusic
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)
 ```
@@ -199,8 +199,8 @@ sudo apt install mpv                # or: sudo apt install ffmpeg (for ffplay)
 pip install yt-dlp                  # or: sudo apt install yt-dlp
 
 # Build (audio is stubbed on non-Android — silent playback, visualizer still works)
-git clone https://github.com/yourname/climusic.git
-cd climusic
+git clone https://github.com/itzender5820/Climusic.git
+cd Climusic
 cmake -B build
 cmake --build build -j$(nproc)
 ```
