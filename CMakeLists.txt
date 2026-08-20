@@ -60,9 +60,30 @@ find_library(AVUTIL_LIB   avutil)
 find_library(SWSCALE_LIB  swscale)
 find_library(SWRESAMPLE_LIB swresample)
 
-if(NOT AVFORMAT_LIB)
-    message(FATAL_ERROR "FFmpeg not found — run: pkg install ffmpeg")
-endif()
+# BUGFIX (this pass): only AVFORMAT_LIB checked before linking.
+# AVCODEC_LIB / AVUTIL_LIB / SWSCALE_LIB / SWRESAMPLE_LIB / AVFORMAT_INC 
+# resolved but never validated, if any came back NOTFOUND, 
+# CMake would pass "<VAR>-NOTFOUND"  string straight
+# into target_link_libraries / target_include_directories. 
+# (some distros split these into separate packages)
+# Required FFmpeg components now checked up front.
+# Additionally, "pkg install ffmpeg" only works on Termux,
+# generalised message to instruct user to install ffmpeg dev packages
+foreach(_ffmpeg_dep
+    AVFORMAT_INC
+    AVFORMAT_LIB
+    AVCODEC_LIB
+    AVUTIL_LIB
+    SWSCALE_LIB
+    SWRESAMPLE_LIB
+)
+    if(NOT DEFINED ${_ffmpeg_dep} OR NOT ${_ffmpeg_dep})
+        message(FATAL_ERROR
+            "Required FFmpeg component '${_ffmpeg_dep}' was not found."
+            "Please install FFmpeg development packages for your system."
+        )
+    endif()
+endforeach()
 
 target_include_directories(musico_verse PRIVATE ${AVFORMAT_INC})
 target_link_libraries(musico_verse PRIVATE
