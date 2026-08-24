@@ -236,7 +236,6 @@ VisualizerFrame Visualizer::render_scope() {
 // ─── Public render dispatch ───────────────────────────────────────────────────
 VisualizerFrame Visualizer::render(VizStyle style, int bands) {
     bands = std::clamp(bands, 16, MAX_BANDS);
-<<<<<<< HEAD
     // BUGFIX (audit B6): render_bars() (and its update_peaks() call) used
     // to run entirely outside the lock, reading/writing peak_cols_ and
     // peak_hold_timer_ unsynchronized against init()'s std::vector::assign
@@ -256,25 +255,5 @@ VisualizerFrame Visualizer::render(VizStyle style, int bands) {
             return render_scope();
         default:
             return render_bars(smooth_, bands);
-||||||| empty tree
-=======
-    std::array<float, MAX_BANDS> snap;
-    {
-        std::lock_guard lk(mtx_);
-        snap = smooth_;
-        if ((int)peak_cols_.size() != width_) {
-            peak_cols_.assign(width_, 0.0f);
-            peak_hold_timer_.assign(width_, 0);
-        }
-    }
-
-    switch (style) {
-        case VizStyle::SCOPE: {
-            std::lock_guard lk(mtx_);
-            return render_scope();
-        }
-        default:
-            return render_bars(snap, bands);
->>>>>>> origin/master
     }
 }
