@@ -2,6 +2,19 @@
 #include "playlist.h"
 #include <cctype>
 #include <algorithm>
+#include <cstdlib>
+
+// Expands a leading `~` to the user's home directory (via $HOME).
+// Allows config.txt paths like MUSIC_DIR="~/music" or MUSIC_DIR="~/.cache/..."
+static std::string expand_path(const std::string& path) {
+    if (!path.empty() && path[0] == '~') {
+        const char* home = std::getenv("HOME");
+        if (home) {
+            return std::string(home) + path.substr(1);
+        }
+    }
+    return path;
+}
 
 // BUGFIX (audit D2): ::tolower fed straight to std::ranges::transform gets
 // called with a plain `char`, which is signed on most platforms — a
@@ -35,10 +48,11 @@ void Playlist::sort_entries(std::vector<PlaylistEntry>& v) {
 
 // ─── load_dir ────────────────────────────────────────────────────────────────
 void Playlist::load_dir(const std::string& dir) {
+    std::string path = expand_path(dir);
     all_entries_.clear();
     idx_ = 0;
     std::error_code ec;
-    fs::recursive_directory_iterator it(dir,
+    fs::recursive_directory_iterator it(path,
         fs::directory_options::skip_permission_denied, ec);
     if (ec) { apply_filter(); return; }
     // BUGFIX (audit B10): on some standard library implementations, an
@@ -67,9 +81,10 @@ void Playlist::load_dir(const std::string& dir) {
 
 // ─── import ───────────────────────────────────────────────────────────────────
 void Playlist::import(const std::string& path) {
+    std::string expanded = expand_path(path);
     std::error_code ec;
-    if (fs::is_directory(path, ec)) {
-        fs::recursive_directory_iterator it(path,
+    if (fs::is_directory(expanded, ec)) {
+        fs::recursive_directory_iterator it(expanded,
             fs::directory_options::skip_permission_denied, ec);
         for (; !ec && it != fs::recursive_directory_iterator(); it.increment(ec)) {
             if (ec) { ec.clear(); continue; }
@@ -78,15 +93,16 @@ void Playlist::import(const std::string& path) {
             ec.clear();
         }
         sort_entries(all_entries_);
-    } else if (fs::is_regular_file(path, ec) && is_audio(path)) {
-        all_entries_.push_back(make_entry(path));
+    } else if (fs::is_regular_file(expanded, ec) && is_audio(expanded)) {
+        all_entries_.push_back(make_entry(expanded));
         sort_entries(all_entries_);
     }
     apply_filter();
 }
 
 void Playlist::add(const std::string& path) {
-    all_entries_.push_back(make_entry(path));
+    std::string expanded = expand_path(path);
+    all_entries_.push_back(make_entry(expanded));
     apply_filter();
 }
 

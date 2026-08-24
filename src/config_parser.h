@@ -383,6 +383,10 @@ private:
         if (has("stream_search_results"))
             s.stream_search_results = std::clamp(gi("stream_search_results", 30), 5, 50);
 
+        // ── Music Directory ───────────────────────────────────────────────
+        if (has("MUSIC_DIR"))
+            s.music_dir = kv["MUSIC_DIR"];
+
         // ── Layout ────────────────────────────────────────────────────────
         if (has("DESK_MODE"))
             s.desk_layout = kv["DESK_MODE"];

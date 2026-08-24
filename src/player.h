@@ -17,7 +17,7 @@ public:
     Player();
     ~Player();
 
-    bool init();
+    bool init(const std::string& music_dir);
     void shutdown();
 
     void load_and_play(const std::string& path);

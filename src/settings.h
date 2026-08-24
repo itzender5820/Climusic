@@ -249,6 +249,8 @@ struct Settings {
     bool        auto_save_config = false;
     // How many results a `yt:` search asks yt-dlp for / shows.
     int         stream_search_results = 30;
+    // Path to the local music library.
+    std::string music_dir = "/sdcard/music/";
 
     // Layout
     LayoutMode  layout_mode = LayoutMode::AUTO;
@@ -294,6 +296,7 @@ struct Settings {
         f << "stream_visualizer=" << (int)stream_visualizer << '\n';
         f << "auto_save_config=" << (int)auto_save_config << '\n';
         f << "stream_search_results=" << stream_search_results << '\n';
+        f << "MUSIC_DIR=" << music_dir << '\n';
         f << "layout_mode=" << (int)layout_mode << '\n';
         f << "theme_idx="   << theme_idx        << '\n';
         wc("border",        colors.border);
@@ -359,6 +362,7 @@ struct Settings {
         stream_visualizer = (gi("stream_visualizer", 1) != 0);
         auto_save_config  = (gi("auto_save_config", 0) != 0);
         stream_search_results = std::clamp(gi("stream_search_results", 30), 5, 50);
+        if (kv.count("MUSIC_DIR")) music_dir = kv["MUSIC_DIR"];
         layout_mode = (LayoutMode)std::clamp(gi("layout_mode", 0), 0, 2);
         theme_idx   = std::clamp(gi("theme_idx",   0), 0, THEME_COUNT - 1);
 

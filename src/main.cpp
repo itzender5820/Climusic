@@ -724,7 +724,7 @@ static int draw_list(WINDOW* w, const Playlist& pl,
     draw_box(w, g_cfg.border_chars);
     std::string lbl = pl.has_filter()
         ? "FILTER: " + pl.folder_filter() + " " + std::to_string(pl.count()) + "/" + std::to_string(pl.total_count())
-        : Playlist::MUSIC_DIR;
+        : g_cfg.music_dir;
     border_label(w, lbl);
 
     wattron(w, COLOR_PAIR(CP_SEARCH_BAR));
@@ -1534,7 +1534,7 @@ int main(int argc, char* argv[]) {
 
     // ── Init player ───────────────────────────────────────────────────────
     Player player;
-    if (!player.init()) {
+    if (!player.init(g_cfg.music_dir)) {
         endwin();
         fprintf(stderr, "Player init failed: %s\n", player.status_msg.c_str());
         return 1;
@@ -1892,9 +1892,9 @@ int main(int argc, char* argv[]) {
                     if (is_streaming) { stream_volume = std::min(100, stream_volume+5); stream_player.set_volume(stream_volume); }
                 } else if (ch == g_cfg.keys.vol_down) {
                     if (is_streaming) { stream_volume = std::max(0, stream_volume-5); stream_player.set_volume(stream_volume); }
-                } else if (ch == g_cfg.keys.download_stream) {
+               } else if (ch == g_cfg.keys.download_stream) {
                     if (is_streaming) {
-                        if (StreamDownloader::download(current_stream.url, Playlist::MUSIC_DIR))
+                        if (StreamDownloader::download(current_stream.url, g_cfg.music_dir))
                             flash("Downloading \xe2\x80\x9c" + current_stream.title + "\xe2\x80\x9d\xe2\x80\xa6");
                         else
                             flash("yt-dlp not found \xe2\x80\x94 can't download");
@@ -2027,7 +2027,7 @@ int main(int argc, char* argv[]) {
             }
             else if (ch == k.download_stream) {
                 if (is_streaming) {
-                    if (StreamDownloader::download(current_stream.url, Playlist::MUSIC_DIR))
+                    if (StreamDownloader::download(current_stream.url, g_cfg.music_dir))
                         flash("Downloading \xe2\x80\x9c" + current_stream.title + "\xe2\x80\x9d\xe2\x80\xa6");
                     else
                         flash("yt-dlp not found \xe2\x80\x94 can't download");

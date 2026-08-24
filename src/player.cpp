@@ -6,11 +6,11 @@
 Player::Player() = default;
 Player::~Player() { shutdown(); }
 
-bool Player::init() {
+bool Player::init(const std::string& music_dir) {
     AudioSpec spec{ .sample_rate = 44100, .channels = 2, .buffer_size = 2048 };
     if (!audio_.init(spec)) { status_msg = "AudioEngine init failed"; return false; }
     audio_.set_volume(volume_ / 100.0f);
-    playlist_.load_dir(Playlist::MUSIC_DIR);
+    playlist_.load_dir(music_dir);
     return true;
 }
 
