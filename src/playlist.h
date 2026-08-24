@@ -17,9 +17,7 @@ struct PlaylistEntry {
 
 class Playlist {
 public:
-    inline static const std::string MUSIC_DIR = "/sdcard/music/";
-
-    void load_dir(const std::string& dir = MUSIC_DIR);
+    void load_dir(const std::string& dir);
     void import(const std::string& path);
     void add(const std::string& path);
 

@@ -20,7 +20,6 @@ bool AudioEngine::init(const AudioSpec& spec) {
 
 void AudioEngine::shutdown() {
     stop();
-<<<<<<< HEAD
     // audit A2: wait for the worker thread to genuinely exit before this
     // object (and its members the thread touches) can be destroyed.
     if (worker_.joinable()) worker_.join();
@@ -56,33 +55,6 @@ bool AudioEngine::start(AudioCallback cb) {
                 std::chrono::microseconds((int)(adjusted * 1000)));
         }
     });
-||||||| empty tree
-=======
-    initialized_ = false;
-}
-
-bool AudioEngine::start(AudioCallback cb) {
-    if (!initialized_) return false;
-    callback_ = cb;
-    playing_  = true;
-    paused_   = false;
-
-    // Spin a thread that calls the callback at ~real-time rate (speed-adjusted)
-    std::thread([this]() {
-        std::vector<float> buf(spec_.buffer_size * spec_.channels);
-        while (playing_) {
-            if (!paused_ && callback_) {
-                int written = callback_(buf.data(), spec_.buffer_size);
-                push_viz_buffer(buf.data(), written);
-            }
-            // Adjust sleep for speed: faster speed = shorter sleep = more callbacks/sec
-            double dur_ms = 1000.0 * spec_.buffer_size / spec_.sample_rate;
-            double adjusted = dur_ms / std::max(0.1f, speed_.load());
-            std::this_thread::sleep_for(
-                std::chrono::microseconds((int)(adjusted * 1000)));
-        }
-    }).detach();
->>>>>>> origin/master
     return true;
 }
 

@@ -24,7 +24,6 @@
 #include <vector>
 #include <algorithm>
 #include <filesystem>
-<<<<<<< HEAD
 #include <fcntl.h>
 #include <sys/file.h>
 #include <unistd.h>
@@ -128,90 +127,6 @@ public:
         for (auto& line : lines) out << line << '\n';
         out.close();
         unlock();
-||||||| empty tree
-=======
-
-namespace fs = std::filesystem;
-
-class ConfigParser {
-public:
-    // Parse config.txt and overlay its values onto `s`.
-    // Returns false if file not found (s is unchanged).
-    static bool parse(const std::string& path, Settings& s) {
-        std::ifstream f(path);
-        if (!f.is_open()) {
-            // Try executable-adjacent config.txt
-            auto alt = fs::path(path).parent_path() / "config.txt";
-            f.open(alt.string());
-            if (!f.is_open()) return false;
-        }
-        std::string src((std::istreambuf_iterator<char>(f)),
-                         std::istreambuf_iterator<char>());
-        parse_string(src, s);
-        return true;
-    }
-
-    // Locate config.txt in standard paths.
-    static std::string find_config() {
-        // 1. ~/.config/climusic/config.txt
-        const char* home = getenv("HOME");
-        if (!home) home = "/data/data/com.termux/files/home";
-        std::string p1 = std::string(home) + "/.config/climusic/config.txt";
-        if (fs::exists(p1)) return p1;
-        // 2. current directory
-        if (fs::exists("config.txt")) return "config.txt";
-        // 3. one level up
-        if (fs::exists("../config.txt")) return "../config.txt";
-        return "";
-    }
-
-    // Writes the settings-panel-editable subset of `s` (colors, viz ints,
-    // layout mode, theme, hotkeys) back into the real config.txt at `path`
-    // — non-destructively: existing lines for keys we manage are replaced
-    // in place, keys not yet present are appended under a marked section,
-    // and everything else (comments, the layout DSL, border chars, font
-    // map, MUSIC_DIR, etc.) is left completely untouched. Returns false if
-    // `path` can't be read or written.
-    //
-    // Not covered: font_map (font_en block) — rarely edited and awkward to
-    // regenerate losslessly; left as whatever's already in the file.
-    static bool write_back(const std::string& path, const Settings& s) {
-        std::ifstream in(path);
-        if (!in.is_open()) return false;
-        std::vector<std::string> lines;
-        {
-            std::string line;
-            while (std::getline(in, line)) lines.push_back(line);
-        }
-        in.close();
-
-        std::map<std::string, std::string> managed = build_managed_kv(s);
-
-        // Replace in place wherever a managed key already has a line.
-        for (auto& line : lines) {
-            size_t eq = line.find('=');
-            if (eq == std::string::npos) continue;
-            std::string key = line.substr(0, eq);
-            auto ws = key.find_first_not_of(" \t");
-            auto we = key.find_last_not_of(" \t");
-            key = (ws == std::string::npos) ? "" : key.substr(ws, we - ws + 1);
-            auto it = managed.find(key);
-            if (it != managed.end()) {
-                line = it->first + "=" + it->second;
-                managed.erase(it);   // consumed — whatever's left gets appended below
-            }
-        }
-
-        if (!managed.empty()) {
-            lines.push_back("");
-            lines.push_back("## ── Saved from the in-app settings panel ──────────────────────────");
-            for (auto& [k, v] : managed) lines.push_back(k + "=" + v);
-        }
-
-        std::ofstream out(path, std::ios::trunc);
-        if (!out.is_open()) return false;
-        for (auto& line : lines) out << line << '\n';
->>>>>>> origin/master
         return true;
     }
 
@@ -467,6 +382,10 @@ private:
             s.auto_save_config = (gi("auto_save_config", 0) != 0);
         if (has("stream_search_results"))
             s.stream_search_results = std::clamp(gi("stream_search_results", 30), 5, 50);
+
+        // ── Music Directory ───────────────────────────────────────────────
+        if (has("MUSIC_DIR"))
+            s.music_dir = kv["MUSIC_DIR"];
 
         // ── Layout ────────────────────────────────────────────────────────
         if (has("DESK_MODE"))
