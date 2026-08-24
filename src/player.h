@@ -9,6 +9,7 @@
 #include <atomic>
 #include <string>
 #include <mutex>
+#include "proc_util.h"
 
 enum class PlayerState { STOPPED, PLAYING, PAUSED };
 
@@ -60,6 +61,7 @@ private:
     AudioEngine     audio_;
     AvDecoder       decoder_;
     mutable std::mutex decoder_mtx_;   // audit B2 — see player.cpp
+    ChildProc       mpv_proc_;         // mpv audio backend for Linux
     Playlist        playlist_;
     Visualizer      visualizer_;
     VocalVisualizer vocal_viz_;

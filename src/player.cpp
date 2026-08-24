@@ -2,6 +2,7 @@
 #include "player.h"
 #include <algorithm>
 #include <cmath>
+#include "proc_util.h"
 
 Player::Player() = default;
 Player::~Player() { shutdown(); }
@@ -16,6 +17,9 @@ bool Player::init(const std::string& music_dir) {
 
 void Player::shutdown() {
     quit_ = true;
+    #ifndef __ANDROID__
+    if (mpv_proc_.pid > 0) kill_child(mpv_proc_);
+    #endif
     audio_.stop();
     audio_.shutdown();
     decoder_.close();
@@ -23,6 +27,9 @@ void Player::shutdown() {
 
 void Player::load_and_play(const std::string& path) {
     audio_.stop();
+    #ifndef __ANDROID__
+    if (mpv_proc_.pid > 0) kill_child(mpv_proc_);
+    #endif
     decoder_.close();
     track_done_ = false;
 
@@ -34,9 +41,21 @@ void Player::load_and_play(const std::string& path) {
     meta_  = decoder_.meta();
     state_ = PlayerState::PLAYING;
 
+    #ifdef __ANDROID__
     audio_.start([this](float* buf, int frames) -> int {
         return this->audio_callback(buf, frames);
     });
+    #else
+    // On Linux, spawn mpv to handle actual audio output to the speakers.
+    std::string cmd = "mpv --no-video --no-terminal --really-quiet \"" + path + "\"";
+    mpv_proc_ = spawn_killable(cmd);
+    if (mpv_proc_.fd >= 0) close(mpv_proc_.fd); // We don't need mpv's stdout
+    
+    // Still use the internal audio engine to feed the visualizer in real-time.
+    audio_.start([this](float* buf, int frames) -> int {
+        return this->audio_callback(buf, frames);
+    });
+    #endif
 }
 
 int Player::audio_callback(float* buf, int frames) {
@@ -91,7 +110,13 @@ void Player::play_pause() {
     // itself instead, so lyrics fetching is never bypassed.
 }
 
-void Player::stop() { audio_.stop(); state_ = PlayerState::STOPPED; }
+void Player::stop() {
+    #ifndef __ANDROID__
+    if (mpv_proc_.pid > 0) kill_child(mpv_proc_);
+    #endif
+    audio_.stop();
+    state_ = PlayerState::STOPPED;
+}
 
 void Player::next() {
     // Shuffle: pick a random index different from current
