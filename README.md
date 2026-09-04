@@ -172,7 +172,7 @@ pkg install -y mpv yt-dlp
 # or, if mpv isn't available: pkg install -y ffmpeg yt-dlp   (ffmpeg ships ffplay)
 
 # 4. Clone and build
-git clone https://github.com/yourname/climusic.git
+git clone https://github.com/itzender5820/climusic.git
 cd climusic
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)
